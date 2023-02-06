@@ -2,8 +2,11 @@ from flask import Flask, request, redirect, render_template
 
 app = Flask(__name__)
 
+@app.route('/')
+def redirect_to_index():
+    return redirect('/index')
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
 def create_playlist():
     if request.method == "POST":
         aplink = request.form.get('apple_music_playlist_url')
