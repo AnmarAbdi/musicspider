@@ -1,0 +1,13 @@
+<html>
+  <head>
+    <title>Spyder</title>
+  </head>
+  <body>
+    <h1>s.pyder</h1>
+    <form action="{{ url_for("create_playlist") }}" method="post">
+      <label for="apple_music_playlist_url">Apple Music Playlist URL:</label>
+      <input type="text" id="apple_music_playlist_url" name="apple_music_playlist_url" placeholder="Enter Link">
+      <input type="submit" value="Create Playlist">
+    </form>
+  </body>
+</html>
