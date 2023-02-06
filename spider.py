@@ -1,12 +1,10 @@
 from flask import Flask, request, redirect, render_template
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
-@app.route('/')
-def redirect_to_index():
-    return redirect('/index.html')
 
-@app.route('/index', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def create_playlist():
     if request.method == "POST":
         aplink = request.form.get('apple_music_playlist_url')
