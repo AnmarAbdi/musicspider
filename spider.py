@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def redirect_to_index():
-    return redirect('/index')
+    return redirect('/index.html')
 
 @app.route('/index', methods=['GET', 'POST'])
 def create_playlist():
