@@ -4,6 +4,7 @@ import requests # To scrape HTML from page
 from dotenv import load_dotenv
 import os
 import json
+import mysql.connector
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.gitignore', '.env')
 load_dotenv(dotenv_path)
@@ -33,47 +34,52 @@ def index():
 def parse_playlist():
     if request.method == "POST":
         print("Starting PARSE!!!!!!!!!!!!!!!!!!!!!110000")
-        songlist = []
-        artistlist = []
+        """songlist = []
+        artistlist = []"""
         aplink = request.form.get('apple_music_playlist_url')
         source = requests.get(aplink).text
         soup = BeautifulSoup(source, 'html.parser')
-        
-        for title in soup.find_all('div', 'songs-list-row__song-name'):
-            isotitles = format(title.text)  # format titles as text
-            songlist.append(isotitles)  # add each song title to songlist
-        
-        for artist in soup.find_all('div', 'songs-list-row__by-line'):
-            isoartist = format(artist.text)
-            
-            # Handling multiple artists separated by comma
-            artists = []
-            current_artist = ""
-            within_quotes = False
-            for char in isoartist:
-                if char == "," and not within_quotes:
-                    artists.append(current_artist.strip())
-                    current_artist = ""
-                else:
-                    if char == '"':
-                        within_quotes = not within_quotes
-                    current_artist += char
-            artists.append(current_artist.strip())
-            
-            artistlist.append(artists)
-        
-        if len(songlist) == len(artistlist):
-            matched = []
-            for i in range(len(songlist)):
-                artists = artistlist[i]
-                for artist in artists:
-                    matched.append((songlist[i], artist))
-            session['songs'] = matched
-            print(session['songs'])
-            return redirect('/create_playlist')
 
-    return render_template('index.html', link='apple_music_playlist_url')
+        cnx = mysql.connector.connect(
+            user=os.getenv('DB_USER'), 
+            password=os.getenv('DB_PASS'), 
+            host=os.getenv('DB_HOST'), 
+            database=os.getenv('DB_NAME')
+        )
+    
+        # Get a cursor
+        cursor = cnx.cursor()
 
+        # find all song divs
+        song_divs = soup.find_all('div', {'class': 'songs-list__col songs-list__col--song svelte-17mxcgw'})
+
+        for div in song_divs:
+            # find song name
+            song_name_div = div.find('div', {'class': 'songs-list-row__song-name svelte-17mxcgw'})
+            if song_name_div:
+                song_name = song_name_div.text.strip()
+
+            # find first artist name
+            artist_name_a = div.find('a', {'class': 'click-action svelte-1nh012k'})
+            if artist_name_a:
+                artist_name = artist_name_a.text.strip()
+
+            add_song = ("INSERT INTO songs "
+                        "(title, artist) "
+                        "VALUES (%s, %s)")
+
+            # Insert new song
+            data_song = (song_name, artist_name)
+            cursor.execute(add_song, data_song)
+
+        # Make sure data is committed to the database
+        cnx.commit()
+
+        cursor.close()
+        cnx.close()
+        return ":D"
+        
+        
 
 @app.route('/create_playlist', methods=['GET', 'POST'])
 def create_playlist():
@@ -86,6 +92,7 @@ def create_playlist():
         print(SCOPES)
         return redirect(auth_url)
     songs = session.get('songs')
+    print(songs)
     print("FIRST PLAYLIST CHECK")
     headers = {
         "Authorization": f"Bearer {access_token}"
