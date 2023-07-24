@@ -6,7 +6,7 @@ import os
 import json
 import mysql.connector
 
-dotenv_path = os.path.join(os.path.dirname(__file__), '.gitignore', '.env')
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
 app = Flask(__name__)
@@ -52,7 +52,7 @@ def parse_playlist():
 
         # find all song divs
         song_divs = soup.find_all('div', {'class': 'songs-list__col songs-list__col--song svelte-17mxcgw'})
-
+        print("SONG DIVS")
         for div in song_divs:
             # find song name
             song_name_div = div.find('div', {'class': 'songs-list-row__song-name svelte-17mxcgw'})
