@@ -1,13 +1,31 @@
 <html>
   <head>
     <title>Spyder</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   </head>
   <body>
     <h1>s.pyder</h1>
-    <form action="{{ url_for("parse_playlist") }}" method="post">
+    <form id="form" method="post">
       <label for="apple_music_playlist_url">Apple Music Playlist URL:</label>
       <input type="text" id="apple_music_playlist_url" name="apple_music_playlist_url" placeholder="Enter Link" required>
-      <input type="submit" value="Create Playlist">
+      <input type="submit" value="{{ 'Start Process' if is_authenticated else 'Connect to Spotify' }}">
     </form>
+
+    <script>
+      $(document).ready(function(){
+        $('#form').on('submit', function(e){
+          var btnText = $('#form input[type="submit"]').val();
+          if(btnText == 'Connect to Spotify') {
+            e.preventDefault();
+            $.getJSON("/get_spotify_login_url", function(data) {
+              window.location.href = data.url;
+            });
+          } else {
+            this.action = "{{ url_for('parse_playlist') }}";
+          }
+        });
+      });
+    </script>
+
   </body>
 </html>
